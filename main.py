@@ -10,8 +10,6 @@ DISCORD_TOKEN = os.getenv("TOKEN")
 
 bot = commands.Bot(command_prefix="uc!")
 
-hello_message = ['hello']
-
 @bot.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot))
