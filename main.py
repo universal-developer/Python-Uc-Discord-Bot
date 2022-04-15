@@ -38,15 +38,17 @@ async def on_member_remove(member):
 #Help command    
 @bot.command(name = 'help')
 async def on_help(ctx):
-    await ctx.send(f"""***🦄There is what I can actually do:***
+    await ctx.send(f"""***🔥There is what I can actually do:***
                    
 **| {PREFIX}help** - *displays help command 🚀*
 **| {PREFIX}cvc <channels name>** - *creates voice channel (for administrators only) 🚀*
 **| {PREFIX}ctc <channels name>** - *creates text channel (for administrators only) 🚀*
-**| {PREFIX}cls <amount>** - *cleans chat. Also you can use: clear, cleaning, clear 🚀*
+**| {PREFIX}cls <amount>** - *cleans chat, besides pined messages. Also you can use: clear, cleaning, clear 🚀*
 **| {PREFIX}welcome** - *shows welcome message (for administrators only) 🚀*
 
-***Other commands such as role-claim are reproduced automatically by the developer of this bot. 🦄 ***      
+**‼️It doesn't matter in which case the command is written. Be it uc!help or UC!HELP or Uc!HeLp‼️**
+
+***🦄Other commands such as role-claim are reproduced automatically by the developer of this bot. 🦄 ***      
     """)
 
 #Welcome Command
@@ -73,7 +75,7 @@ async def on_welcome(ctx):
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['clean', 'cleaning', 'cls', 'clear'], brief = "Clear chat from message. 20 Messages by default", usage = "clear <amount=20>")
 async def on_clear(ctx, amount: int = 20):
-    await ctx.channel.purge(limit = amount)
+    await ctx.channel.purge(limit = amount, check = lambda msg: not msg.pinned)
 
 #Create text channel 
 @commands.has_permissions(administrator = True)    
