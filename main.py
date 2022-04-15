@@ -11,12 +11,19 @@ PREFIX = "uc!"
 intents = discord.Intents.default()
 intents.members = True
 
-bot = commands.Bot(command_prefix=f"{PREFIX}", help_command = None, intents=intents)
+bot = commands.Bot(command_prefix = f"{PREFIX}", help_command = None, intents = intents, description = "Universal Helper", case_insensitive = False)
 
 #Bot is ready command
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity = discord.Game(name = "Ready to help"))
     print('We have logged in as {0.user}'.format(bot))
+    
+#Getting all messages as lowercase
+@bot.event
+async def on_message(message):
+    message.content = message.content.lower()
+    await bot.process_commands(message)
 
 #Bot sends message for members, when they're joining
 @bot.event
@@ -31,7 +38,16 @@ async def on_member_remove(member):
 #Help command    
 @bot.command(name = 'help')
 async def on_help(ctx):
-    await ctx.send("Custom help command")
+    await ctx.send(f"""***🦄There is what I can actually do:***
+                   
+**| {PREFIX}help** - *displays help command 🚀*
+**| {PREFIX}cvc <channels name>** - *creates voice channel (for administrators only) 🚀*
+**| {PREFIX}ctc <channels name>** - *creates text channel (for administrators only) 🚀*
+**| {PREFIX}cls <amount>** - *cleans chat. Also you can use: clear, cleaning, clear 🚀*
+**| {PREFIX}welcome** - *shows welcome message (for administrators only) 🚀*
+
+***Other commands such as role-claim are reproduced automatically by the developer of this bot. 🦄 ***      
+    """)
 
 #Welcome Command
 @commands.has_permissions(administrator = True)
@@ -44,7 +60,7 @@ async def on_welcome(ctx):
                           
                           
                           
-                          My name is 🦄UC🦄 and I am Universal Creator's handheld assistant.\n\nI'm here to help him manage this server, but luckily I have something for you too. \n\n I hope you enjoy being on the server.😉 \n\nBy the way, do not forget, my creator is hard at work on the distributions, which will soon be made🔥🔥🔥.
+                          **My name is 🦄UC🦄 and I am Universal Creator's handheld assistant.\n\nI'm here to help him manage this server, but luckily I have something for you too. \n\n I hope you enjoy being on the server.😉 \n\nBy the way, do not forget, my creator is hard at work on the distributions, which will soon be made🔥🔥🔥.**
                           
                           
                           
@@ -55,23 +71,22 @@ async def on_welcome(ctx):
 
 #Clean chat command
 @commands.has_permissions(administrator = True)
-@bot.command(aliases = ['clean', 'cleaning', 'cls', 'clear'], brief = "Clear chat from message. 10 Messages by default", usage = "clear <amount=10>")
-async def on_clear(ctx, amount: int = 10):
+@bot.command(aliases = ['clean', 'cleaning', 'cls', 'clear'], brief = "Clear chat from message. 20 Messages by default", usage = "clear <amount=20>")
+async def on_clear(ctx, amount: int = 20):
     await ctx.channel.purge(limit = amount)
- 
+
+#Create text channel 
 @commands.has_permissions(administrator = True)    
-@bot.command(aliases = ['create_txt_channel'])
+@bot.command(aliases = ['create_txt_channel', 'ctc'])
 async def create_text_channel(ctx, channel_name):
 	guild = ctx.guild
 	await guild.create_text_channel(channel_name)
 
-
-"""
-@bot.command(name="очистить", brief="Очистить чат от сообщений, по умолчанию 10 сообщений", usage="clear <amount=10>")
-async def clear(ctx, amount: int=10):
-    await ctx.channel.purge(limit=amount)
-    await ctx.send(f"Was deleted {amount} messages...")
-"""
-
+#Create voice channel 
+@commands.has_permissions(administrator = True)    
+@bot.command(aliases = ['create_vc_channel', 'cvc'])
+async def create_voice_channel(ctx, channel_name):
+	guild = ctx.guild
+	await guild.create_voice_channel(channel_name)
 
 bot.run(DISCORD_TOKEN)
