@@ -53,19 +53,17 @@ async def on_welcome(ctx):
     embed.set_footer(text = f"So, here is what I can actually do: {channel_id}")
     await ctx.send(embed = embed)
 
-
 #Clean chat command
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['clean', 'cleaning', 'cls', 'clear'], brief = "Clear chat from message. 10 Messages by default", usage = "clear <amount=10>")
 async def on_clear(ctx, amount: int = 10):
     await ctx.channel.purge(limit = amount)
-    print(f"""================================
-Was deleted {amount} messages...
-================================
-""")
-
-
-
+ 
+@commands.has_permissions(administrator = True)    
+@bot.command(aliases = ['create_txt_channel'])
+async def create_text_channel(ctx, channel_name):
+	guild = ctx.guild
+	await guild.create_text_channel(channel_name)
 
 
 """
