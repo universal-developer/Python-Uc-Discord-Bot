@@ -43,7 +43,7 @@ async def on_help(ctx):
 **| {PREFIX}help** - *displays help command 🚀*
 **| {PREFIX}cvc <channels name>** - *creates voice channel (for administrators only) 🚀*
 **| {PREFIX}ctc <channels name>** - *creates text channel (for administrators only) 🚀*
-**| {PREFIX}cls <amount>** - *cleans chat, besides pined messages. Also you can use: clear, cleaning, clear 🚀*
+**| {PREFIX}cls <amount>** - *cleans chat, besides pined messages. Also you can use: clear, cleaning, clear (for administrators only) 🚀*
 **| {PREFIX}welcome** - *shows welcome message (for administrators only) 🚀*
 
 **‼️It doesn't matter in which case the command is written. Be it uc!help or UC!HELP or Uc!HeLp‼️**
@@ -90,5 +90,34 @@ async def create_text_channel(ctx, channel_name):
 async def create_voice_channel(ctx, channel_name):
 	guild = ctx.guild
 	await guild.create_voice_channel(channel_name)
+
+@commands.has_permissions(administrator = True)
+@bot.command(aliases = ['kick', 'kck'])
+async def kick_user(ctx, user: discord.Member, *, reason):
+    await ctx.guild.kick(user, reason = reason)
+    await ctx.send(f"{user} has been successfully kicked for {reason}.")
+    await user.send(f"You have been kicked in {ctx.guild} for {reason}")
+    
+    
+  
+    
+
+@commands.Cog.listener()
+async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+    """Глобальный обработчик ошибок."""
+
+    if isinstance (ошибка, commands.CommandNotFound):
+        return # Возврат, потому что мы не хотим показывать ошибку для каждой не найденной команды
+    elif isinstance (ошибка, commands.CommandOnCooldown):
+        message = f"Эта команда находится на перезарядке. Повторите попытку через {round(error.retry_after, 1)} секунд."
+    elif isinstance (ошибка, commands.MissingPermissions):
+        message = "У вас отсутствуют необходимые разрешения для запуска этой команды!"
+    elif isinstance (ошибка, commands.UserInputError):
+        message = "Что-то в вашем вводе было неправильным, пожалуйста, проверьте ввод и повторите попытку!"
+    else:
+        message = "О нет! Что-то пошло не так при выполнении команды!"
+
+    await ctx.send (сообщение, delete_after = 5)
+    await ctx.message.delete (задержка = 5)
 
 bot.run(DISCORD_TOKEN)
