@@ -90,34 +90,51 @@ async def create_text_channel(ctx, channel_name):
 async def create_voice_channel(ctx, channel_name):
 	guild = ctx.guild
 	await guild.create_voice_channel(channel_name)
-
+ 
+#Kick user
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['kick', 'kck'])
 async def kick_user(ctx, user: discord.Member, *, reason):
     await ctx.guild.kick(user, reason = reason)
     await ctx.send(f"{user} has been successfully kicked for {reason}.")
-    await user.send(f"You have been kicked in {ctx.guild} for {reason}")
-    
-    
-  
-    
 
-@commands.Cog.listener()
-async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
-    """Глобальный обработчик ошибок."""
+@commands.has_permissions(administrator = True)
+@bot.command(aliases = ['ban', 'bn'])
+async def ban_user(ctx, user: discord.Member, *, reason):
+    await ctx.guild.ban(user, reason = reason)
+    await ctx.send(f"{user} has been successfully banned for {reason}.")
 
-    if isinstance (ошибка, commands.CommandNotFound):
-        return # Возврат, потому что мы не хотим показывать ошибку для каждой не найденной команды
-    elif isinstance (ошибка, commands.CommandOnCooldown):
-        message = f"Эта команда находится на перезарядке. Повторите попытку через {round(error.retry_after, 1)} секунд."
-    elif isinstance (ошибка, commands.MissingPermissions):
-        message = "У вас отсутствуют необходимые разрешения для запуска этой команды!"
-    elif isinstance (ошибка, commands.UserInputError):
-        message = "Что-то в вашем вводе было неправильным, пожалуйста, проверьте ввод и повторите попытку!"
+
+@commands.has_permissions(administrator = True)
+@bot.command(aliases = ['banned_list', 'banned_lst', 'ban_users'])
+async def banned_users(ctx):
+    banned_users = await ctx.guild.bans()
+    
+    await ctx.send(f"Banned Users: {banned_users}")
+
+    
+@commands.has_permissions(administrator = True)
+@bot.command(aliases = ['unban', 'unbn'])
+async def unban_user(ctx, id: int):
+    user = await bot.fetch_user(id)
+    await ctx.guild.unban(user)
+    await ctx.send(f"{user} has been successfully unbanned")
+
+
+ 		    
+
+#Errors handling
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.reply("You are missing a required argument")
+    elif isinstance(error, commands.MissingPermissions):
+        await ctx.reply("You do not have a right permisions")
+    elif isinstance(error, commands.MissingRole):
+        await ctx.reply("You are missing a right role")
+    elif isinstance(error, commands.CommandNotFound):
+        await ctx.reply("I don't understand you")
     else:
-        message = "О нет! Что-то пошло не так при выполнении команды!"
-
-    await ctx.send (сообщение, delete_after = 5)
-    await ctx.message.delete (задержка = 5)
+        await ctx.reply("Something went wrong")
 
 bot.run(DISCORD_TOKEN)
