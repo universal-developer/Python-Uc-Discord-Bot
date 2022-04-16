@@ -91,20 +91,21 @@ async def create_voice_channel(ctx, channel_name):
 	guild = ctx.guild
 	await guild.create_voice_channel(channel_name)
  
-#Kick user
+#Kick users
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['kick', 'kck'])
 async def kick_user(ctx, user: discord.Member, *, reason):
     await ctx.guild.kick(user, reason = reason)
     await ctx.send(f"{user} has been successfully kicked for {reason}.")
 
+#Ban users
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['ban', 'bn'])
 async def ban_user(ctx, user: discord.Member, *, reason):
     await ctx.guild.ban(user, reason = reason)
     await ctx.send(f"{user} has been successfully banned for {reason}.")
 
-
+#Showing banned users list
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['banned_list', 'banned_lst', 'ban_users'])
 async def banned_users(ctx):
@@ -112,7 +113,7 @@ async def banned_users(ctx):
     
     await ctx.send(f"Banned Users: {banned_users}")
 
-    
+#Unban users
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['unban', 'unbn'])
 async def unban_user(ctx, id: int):
