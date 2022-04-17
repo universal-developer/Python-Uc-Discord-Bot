@@ -38,13 +38,17 @@ async def on_member_remove(member):
 #Help command    
 @bot.command(name = 'help')
 async def on_help(ctx):
-    await ctx.send(f"""***🔥There is what I can actually do:***
+    await ctx.send(f"""***Here is what I can actually do:***
                    
 **| {PREFIX}help** - *displays help command 🚀*
 **| {PREFIX}cvc <channels name>** - *creates voice channel (for administrators only) 🚀*
 **| {PREFIX}ctc <channels name>** - *creates text channel (for administrators only) 🚀*
 **| {PREFIX}cls <amount>** - *cleans chat, besides pined messages. Also you can use: clear, cleaning, clear (for administrators only) 🚀*
 **| {PREFIX}welcome** - *shows welcome message (for administrators only) 🚀*
+**| {PREFIX}kick <@user> <reason>** - *kicks user from server (for administrators only) 🚀*
+**| {PREFIX}ban <@user> <reason>** - *bans user from server (for administrators only) 🚀*
+**| {PREFIX}banned_list** - *shows banned users list. You can also use: banned_lst, banned_users (for administrators only) 🚀*
+**| {PREFIX}unban <@user's id>** - *unbans user (for administrators only) 🚀*
 
 **‼️It doesn't matter in which case the command is written. Be it uc!help or UC!HELP or Uc!HeLp‼️**
 
@@ -107,7 +111,7 @@ async def ban_user(ctx, user: discord.Member, *, reason):
 
 #Showing banned users list
 @commands.has_permissions(administrator = True)
-@bot.command(aliases = ['banned_list', 'banned_lst', 'ban_users'])
+@bot.command(aliases = ['banned_list', 'banned_lst'])
 async def banned_users(ctx):
     banned_users = await ctx.guild.bans()
     
@@ -120,9 +124,6 @@ async def unban_user(ctx, id: int):
     user = await bot.fetch_user(id)
     await ctx.guild.unban(user)
     await ctx.send(f"{user} has been successfully unbanned")
-
-
- 		    
 
 #Errors handling
 @bot.event
