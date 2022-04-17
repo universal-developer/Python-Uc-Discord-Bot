@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 import sqlite3
+from datetime import datetime, timedelta, timezone
 
 
 load_dotenv()
@@ -11,8 +12,8 @@ DISCORD_TOKEN = os.getenv("TOKEN")
 PREFIX = "uc!"
 intents = discord.Intents.default()
 intents.members = True
-CONNECTION = sqlite3.connect("/Users/artush/Code/bots/discord/uc-discord-bot/uc-bot-db.sqlite3")
-CURSOR = CONNECTION.cursor()
+#CONNECTION = sqlite3.connect("/Users/artush/Code/bots/discord/uc-discord-bot/uc-bot-db.sqlite3")
+#CURSOR = CONNECTION.cursor()
 
 
 bot = commands.Bot(command_prefix = f"{PREFIX}", help_command = None, intents = intents, description = "Universal Helper", case_insensitive = False)
@@ -20,8 +21,8 @@ bot = commands.Bot(command_prefix = f"{PREFIX}", help_command = None, intents = 
 #Bot is ready command
 @bot.event
 async def on_ready():
-    print("Database created and Successfully Connected to SQLite") 
-    print("============================================================")
+    #print("Database created and Successfully Connected to SQLite") 
+    #print("============================================================")
     await bot.change_presence(activity = discord.Game(name = "Ready to help"))
     print('We have logged in as {0.user}'.format(bot))
     
@@ -46,7 +47,11 @@ async def on_member_remove(member):
 async def on_help(ctx):
     await ctx.send(f"""***Here is what I can actually do:***
                    
+***For mere mortals***
 **| {PREFIX}help** - *displays help command 🚀*
+**| {PREFIX}user_info <@mention user>** - *shows user info 🚀*
+
+***For Administrators:***
 **| {PREFIX}cvc <channels name>** - *creates voice channel (for administrators only) 🚀*
 **| {PREFIX}ctc <channels name>** - *creates text channel (for administrators only) 🚀*
 **| {PREFIX}cls <amount>** - *cleans chat, besides pined messages. Also you can use: clear, cleaning, clear (for administrators only) 🚀*
@@ -55,6 +60,8 @@ async def on_help(ctx):
 **| {PREFIX}ban <@user> <reason>** - *bans user from server (for administrators only) 🚀*
 **| {PREFIX}banned_list** - *shows banned users list. You can also use: banned_lst, banned_users (for administrators only) 🚀*
 **| {PREFIX}unban <@user's id>** - *unbans user (for administrators only) 🚀*
+**| {PREFIX}mute <@mention user>** - *mutes user (for administrators only) 🚀*
+**| {PREFIX}unmute <@mention user>** - *unmutes user (for administrators only) 🚀*
 
 **‼️It doesn't matter in which case the command is written. Be it uc!help or UC!HELP or Uc!HeLp‼️**
 
@@ -106,22 +113,36 @@ async def create_voice_channel(ctx, channel_name):
 @bot.command(aliases = ['kick', 'kck'])
 async def kick_user(ctx, user: discord.Member, *, reason):
     await ctx.guild.kick(user, reason = reason)
-    await ctx.send(f"{user} has been successfully kicked for {reason}.")
+    await ctx.send(f"{user.mention} has been successfully kicked for {reason}.")
 
 #Ban users
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['ban', 'bn'])
 async def ban_user(ctx, user: discord.Member, *, reason):
     await ctx.guild.ban(user, reason = reason)
-    await ctx.send(f"{user} has been successfully banned for {reason}.")
+    await ctx.send(f"{user.mention} has been successfully banned for {reason}.")
 
 #Showing banned users list
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['banned_list', 'banned_lst'])
 async def banned_users(ctx):
     bans = await ctx.guild.bans()
-    pretty_list = ["ID: {0.id}\nName: {0.name}\nDiscriminator: {0.discriminator}".format(entry.user) for entry in bans]
-    await ctx.send("**Ban list:** \n{}".format("\n".join(pretty_list)))
+    
+    for ban_entry in bans:
+        user = ban_entry.user
+        user_name = user.name
+        discriminator = user.discriminator
+        user_id = user.id
+        reason = ban_entry.reason
+        
+        await ctx.send(f"""
+*User:* **{user}**
+*Username:* **{user_name}**
+*Discriminator (#):* **{discriminator}**
+*User ID:* **{user_id}**
+*Reason:* **{reason}**           
+            """)
+        
 
 #Unban users
 @commands.has_permissions(administrator = True)
@@ -129,35 +150,98 @@ async def banned_users(ctx):
 async def unban_user(ctx, id: int):
     user = await bot.fetch_user(id)
     await ctx.guild.unban(user)
-    await ctx.send(f"{user} has been successfully unbanned")
+    await ctx.send(f"{user.mention} has been successfully unbanned")
 
+
+#Mute users
 @commands.has_permissions(administrator = True)
-@bot.command(aliases = ['level', 'lvl'])
-async def on_levels(ctx, id):
-    user = await bot.fetch_user(id)
-    name = user.name
-    discriminator = user.discriminator
-    level = 1
+@bot.command(aliases = ['mt', 'mute'])
+async def mute_user(ctx, member: discord.Member): 
+    mute_role = discord.utils.get(ctx.message.guild.roles, name = "Mute")
     
-    await ctx.send(user.name + '\n' + user.discriminator)
+    await member.add_roles(mute_role)
+    await ctx.send(f"{member.mention} have got mute for breaking the rules")
+
+
+#Unmute user
+@commands.has_permissions(administrator = True)
+@bot.command(aliases = ['unmt', 'unmute'])
+async def unmute_user(ctx, member: discord.Member):
+    mute_role = discord.utils.get(ctx.message.guild.roles, name = "Mute")
     
-    my_user = (
-         0, name, discriminator, level
-    )
+    await member.remove_roles(mute_role)
+    await ctx.send(f"{member.mention} was unmuted")
+
+
+def getstatus(m):
+    if str(m.status) == "dnd":
+        return "do not disturb"
+    return m.status
+
+@bot.command(aliases = ['member_info', 'user_info'])
+async def info(ctx, member: discord.Member):
+    # Calculating time since the user created his discord account using the member.created_at method
+    c_delta = datetime.utcnow() - member.created_at
+    c_ago = datetime.fromtimestamp(c_delta.seconds, tz=timezone.utc).strftime("%H:%M:%S")
+    c_at = member.created_at.strftime("%c")
+
+    # Getting join position by sorting the guild.members list with the member.joined_at method
+    join_pos = sorted(ctx.guild.members, key = lambda member: member.joined_at).index(member) + 1
     
-    CURSOR.executemany('INSERT INTO users_database VALUES (?,?,?,?)', my_user)
+    # Defining discord.Embed instance
+    embed = discord.Embed(title = f"{member.name}#{member.discriminator}", timestamp = datetime.utcnow(), color = discord.Color.purple())
+    
+    # Adding fields to the embed
+    embed.add_field(name = "Status:", value=getstatus(member), inline = True)
+    embed.add_field(name = "Guild name:", value=member.display_name, inline=True)
+    embed.add_field(name = "Join position:", value=f"{join_pos}/{len(ctx.guild.members)}", inline = True)
+
+    embed.add_field(name = "Created at:", value=f"{c_at}\n({c_delta.days} days, {c_ago} ago)", inline = True)
+    embed.add_field(name = "ID:", value=member.id, inline=True)
+    embed.add_field(name = "Bot:", value="✅ Yes" if member.bot else "❌ No", inline = True)
+    
+    # Setting the thumbnail as the users profile picture
+    embed.set_thumbnail(url = member.avatar_url)
+    
+    # Setting a footer
+    embed.set_footer(text = f"Requested by {ctx.author.name}", icon_url = ctx.author.avatar_url)
+
+    await ctx.send(embed = embed)
+
+#@commands.has_permissions(administrator = True)
+#@bot.command(aliases = ['level', 'lvl'])
+#async def on_levels(ctx, id):
+    #user = await bot.fetch_user(id)
+    #name = user.name
+    #discriminator = user.discriminator
+    #level = 1
+    
+    #await ctx.send(user.name + '\n' + user.discriminator)
+    
+    #my_user = (
+         #0, name, discriminator, level
+    #)
+    
+    #CURSOR.executemany('INSERT INTO users_database VALUES (?,?,?,?)', my_user)
 
 #Errors handling
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.reply("You are missing a required argument")
+        print(error)
     elif isinstance(error, commands.MissingPermissions):
         await ctx.reply("You do not have a right permisions")
+        print(error)
     elif isinstance(error, commands.MissingRole):
         await ctx.reply("You are missing a right role")
+        print(error)
     elif isinstance(error, commands.CommandNotFound):
-        await ctx.reply("I don't understand you")
+        await ctx.reply("I do not understand you")
+        print(error)
+    elif isinstance(error, discord.NotFound):
+        await ctx.reply("Nobody found")
+        print(error)
     else:
         await ctx.reply("Something went wrong")
         print(error)
