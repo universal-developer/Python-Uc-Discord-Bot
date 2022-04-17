@@ -183,7 +183,7 @@ def getstatus(m):
 async def info(ctx, member: discord.Member):
     # Calculating time since the user created his discord account using the member.created_at method
     c_delta = datetime.utcnow() - member.created_at
-    c_ago = datetime.fromtimestamp(c_delta.seconds, tz=timezone.utc).strftime("%H:%M:%S")
+    c_ago = datetime.fromtimestamp(c_delta.seconds, tz = timezone.utc).strftime("%H:%M:%S")
     c_at = member.created_at.strftime("%c")
 
     # Getting join position by sorting the guild.members list with the member.joined_at method
