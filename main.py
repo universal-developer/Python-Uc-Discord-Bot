@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import discord
 from discord.ext import commands
+import sqlite3
 
 
 load_dotenv()
@@ -10,12 +11,17 @@ DISCORD_TOKEN = os.getenv("TOKEN")
 PREFIX = "uc!"
 intents = discord.Intents.default()
 intents.members = True
+CONNECTION = sqlite3.connect("/Users/artush/Code/bots/discord/uc-discord-bot/uc-bot-db.sqlite3")
+CURSOR = CONNECTION.cursor()
+
 
 bot = commands.Bot(command_prefix = f"{PREFIX}", help_command = None, intents = intents, description = "Universal Helper", case_insensitive = False)
 
 #Bot is ready command
 @bot.event
 async def on_ready():
+    print("Database created and Successfully Connected to SQLite") 
+    print("============================================================")
     await bot.change_presence(activity = discord.Game(name = "Ready to help"))
     print('We have logged in as {0.user}'.format(bot))
     
@@ -113,9 +119,9 @@ async def ban_user(ctx, user: discord.Member, *, reason):
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['banned_list', 'banned_lst'])
 async def banned_users(ctx):
-    banned_users = await ctx.guild.bans()
-    
-    await ctx.send(f"Banned Users: {banned_users}")
+    bans = await ctx.guild.bans()
+    pretty_list = ["ID: {0.id}\nName: {0.name}\nDiscriminator: {0.discriminator}".format(entry.user) for entry in bans]
+    await ctx.send("**Ban list:** \n{}".format("\n".join(pretty_list)))
 
 #Unban users
 @commands.has_permissions(administrator = True)
@@ -124,6 +130,22 @@ async def unban_user(ctx, id: int):
     user = await bot.fetch_user(id)
     await ctx.guild.unban(user)
     await ctx.send(f"{user} has been successfully unbanned")
+
+@commands.has_permissions(administrator = True)
+@bot.command(aliases = ['level', 'lvl'])
+async def on_levels(ctx, id):
+    user = await bot.fetch_user(id)
+    name = user.name
+    discriminator = user.discriminator
+    level = 1
+    
+    await ctx.send(user.name + '\n' + user.discriminator)
+    
+    my_user = (
+         0, name, discriminator, level
+    )
+    
+    CURSOR.executemany('INSERT INTO users_database VALUES (?,?,?,?)', my_user)
 
 #Errors handling
 @bot.event
@@ -138,5 +160,6 @@ async def on_command_error(ctx, error):
         await ctx.reply("I don't understand you")
     else:
         await ctx.reply("Something went wrong")
+        print(error)
 
 bot.run(DISCORD_TOKEN)
