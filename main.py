@@ -172,12 +172,13 @@ async def unmute_user(ctx, member: discord.Member):
     await member.remove_roles(mute_role)
     await ctx.send(f"{member.mention} was unmuted")
 
-
+#Getting users status
 def getstatus(m):
     if str(m.status) == "dnd":
         return "do not disturb"
     return m.status
 
+#User information command
 @bot.command(aliases = ['member_info', 'user_info'])
 async def info(ctx, member: discord.Member):
     # Calculating time since the user created his discord account using the member.created_at method
