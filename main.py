@@ -12,6 +12,7 @@ DISCORD_TOKEN = os.getenv("TOKEN")
 PREFIX = "uc!"
 intents = discord.Intents.default()
 intents.members = True
+SERVER_NAME = "Universal Creator"
 #CONNECTION = sqlite3.connect("/Users/artush/Code/bots/discord/uc-discord-bot/uc-bot-db.sqlite3")
 #CURSOR = CONNECTION.cursor()
 
@@ -35,12 +36,12 @@ async def on_message(message):
 #Bot sends message for members, when they're joining
 @bot.event
 async def on_member_join(member):
-    await bot.get_channel(963807822846496818).send(f"{member.name} has joined")
+    await bot.get_channel(963807822846496818).send(f"Welcome {member.mention} to the {SERVER_NAME} ")
 
 #Bot sends message for members, when they're leave
 @bot.event
 async def on_member_remove(member):
-    await bot.get_channel(964176007605125180).send(f"{member.name} has left")
+    await bot.get_channel(964176007605125180).send(f"Bye {member.mention}")
  
 #Help command    
 @bot.command(name = 'help')
@@ -54,7 +55,7 @@ async def on_help(ctx):
 ***For Administrators:***
 **| {PREFIX}cvc <channels name>** - *creates voice channel (for administrators only) 🚀*
 **| {PREFIX}ctc <channels name>** - *creates text channel (for administrators only) 🚀*
-**| {PREFIX}cls <amount>** - *cleans chat, besides pined messages. Also you can use: clear, cleaning, clear (for administrators only) 🚀*
+**| {PREFIX}cls <amount>** - *cleans chat, besides pined messages. The amount equals to 50 by default. Also you can use: clear, cleaning, clear (for administrators only) 🚀*
 **| {PREFIX}welcome** - *shows welcome message (for administrators only) 🚀*
 **| {PREFIX}kick <@user> <reason>** - *kicks user from server (for administrators only) 🚀*
 **| {PREFIX}ban <@user> <reason>** - *bans user from server (for administrators only) 🚀*
@@ -91,7 +92,7 @@ async def on_welcome(ctx):
 #Clean chat command
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['clean', 'cleaning', 'cls', 'clear'], brief = "Clear chat from message. 20 Messages by default", usage = "clear <amount=20>")
-async def on_clear(ctx, amount: int = 20):
+async def on_clear(ctx, amount: int = 50):
     await ctx.channel.purge(limit = amount, check = lambda msg: not msg.pinned)
 
 #Create text channel 
@@ -111,16 +112,23 @@ async def create_voice_channel(ctx, channel_name):
 #Kick users
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['kick', 'kck'])
-async def kick_user(ctx, user: discord.Member, *, reason):
-    await ctx.guild.kick(user, reason = reason)
-    await ctx.send(f"{user.mention} has been successfully kicked for {reason}.")
+async def kick_user(ctx, member: discord.Member, *, reason):
+    link = await ctx.channel.create_invite(max_age = 300)
+    
+    await member.send(f"Dear {member.mention}, you were kicked for {reason}")
+    await ctx.guild.kick(member, reason = reason)
+    await ctx.send(f"{member.mention} has been successfully kicked for {reason}.")
+    
 
 #Ban users
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['ban', 'bn'])
-async def ban_user(ctx, user: discord.Member, *, reason):
-    await ctx.guild.ban(user, reason = reason)
-    await ctx.send(f"{user.mention} has been successfully banned for {reason}.")
+async def ban_user(ctx, member: discord.Member, *, reason):
+    link = await ctx.channel.create_invite(max_age = 300)
+    
+    await member.send(f"Dear {member.mention} has been successfully banned for {reason} in {link}")
+    await ctx.guild.ban(member, reason = reason)
+    await ctx.send(f"{member.mention} has been successfully banned for {reason}.")
 
 #Showing banned users list
 @commands.has_permissions(administrator = True)
@@ -148,29 +156,35 @@ async def banned_users(ctx):
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['unban', 'unbn'])
 async def unban_user(ctx, id: int):
+    link = await ctx.channel.create_invite(max_age = 300)
+    
     user = await bot.fetch_user(id)
+    await member.send(f"Dear {member.mention}, you were unbanned in {link}")
     await ctx.guild.unban(user)
     await ctx.send(f"{user.mention} has been successfully unbanned")
-
-
+    
 #Mute users
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['mt', 'mute'])
 async def mute_user(ctx, member: discord.Member): 
+    link = await ctx.channel.create_invite(max_age = 300)
+    
     mute_role = discord.utils.get(ctx.message.guild.roles, name = "Mute")
     
     await member.add_roles(mute_role)
-    await ctx.send(f"{member.mention} have got mute for breaking the rules")
-
+    await ctx.send(f"Dear {member.mention}, you were muted for breaking the rules")
+    await member.send(f"Dear {member.mention}, you have got mute in {link} for breaking rules")
 
 #Unmute user
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['unmt', 'unmute'])
 async def unmute_user(ctx, member: discord.Member):
     mute_role = discord.utils.get(ctx.message.guild.roles, name = "Mute")
+    link = await ctx.channel.create_invite(max_age = 300)
     
     await member.remove_roles(mute_role)
-    await ctx.send(f"{member.mention} was unmuted")
+    await member.send(f"Dear {member.mention}, you were unmuted in {link}")
+    await ctx.send(f"{member.mention} was successfully unmuted")
 
 #Getting users status
 def getstatus(m):
