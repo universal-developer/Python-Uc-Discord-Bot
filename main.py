@@ -76,7 +76,7 @@ async def on_welcome(ctx):
     
     channel_id = bot.get_channel(964218392007544923)
     
-    embed = discord.Embed(title = "🚀🚀🚀 You're Welcome 🚀🚀🚀", url = "https://realdrewdata.medium.com/", description = """
+    embed = discord.Embed(title = "🚀🚀🚀 You're Welcome 🚀🚀🚀", description = """
                           
                           
                           
@@ -223,21 +223,64 @@ async def info(ctx, member: discord.Member):
 
     await ctx.send(embed = embed)
 
-#@commands.has_permissions(administrator = True)
-#@bot.command(aliases = ['level', 'lvl'])
-#async def on_levels(ctx, id):
-    #user = await bot.fetch_user(id)
-    #name = user.name
-    #discriminator = user.discriminator
-    #level = 1
+
+@commands.has_permissions(administrator = True)
+@bot.command(aliases = ['roles_claim_message', 'rcm'])
+async def send_roles_claim_message(ctx):
+    embed = discord.Embed(title = f"🦄Hi. Here you can get role🦄", description = """
+                          
+**Here you can choose a role based on your interests and skills. Just click on the reaction, and the role will appear for you.🚀
+
+In addition, new features and chats will open up for you, of course, both text and voice. I would also like to add that with the number of messages you send on our server, your level increases, which also gives you some rights.🚀
+
+Of course, firstly you will have to complete a survey with the bot so that we can be sure of your adequacy.🚀
+
+It is worth mentioning that in this way you can even get the role of a moderator.🚀**
+
+                          
+                          """,  color = discord.Color.orange())
     
-    #await ctx.send(user.name + '\n' + user.discriminator)
+    embed.set_author(name = "Universal Creator", icon_url = ctx.author.avatar_url)
     
-    #my_user = (
-         #0, name, discriminator, level
-    #)
     
-    #CURSOR.executemany('INSERT INTO users_database VALUES (?,?,?,?)', my_user)
+    dev_role = discord.utils.get(guild.roles, name = "Dev")
+    gamer_role = discord.utils.get(guild.roles, name = "Gamer")
+    musicant_role = discord.utils.get(guild.roles, name = "")
+    doctor_role = discord.utils.get(guild.roles, name = "")
+    artist_role = discord.utils.get(guild.roles, name = "")
+    writer_role = discord.utils.get(guild.roles, name = "")
+    trader_role = discord.utils.get(guild.roles, name = "")
+    businessman_role = discord.utils.get(guild.roles, name = "")
+    
+    talant_embed = discord.Embed(title = f"Talant roles", description = f"""
+                                
+**Dev**: {dev_role}
+**Gamer**: {gamer_role}
+**Musicant**: {}
+                                
+                                
+                                """)
+    
+    
+    await ctx.send(embed = embed)
+    
+@bot.even()
+async def color_role_claim(ctx, payload):
+    message_id = 965958595193753672
+    
+    if message_id == payload.message_id:
+        member = payload.member
+        guild = payload.guild
+        
+        emoji = payload.emoji.name
+        
+        if emoji == '🤵‍♂️':
+            role = discord.utils.get(guild.roles, name = "male")
+        elif emoji == '👰‍♀️':
+            role = discord.utils.get(guild.roles, name = "female")
+        elif emoji == '':
+            pass
+    
 
 #Errors handling
 @bot.event
