@@ -223,10 +223,18 @@ async def info(ctx, member: discord.Member):
 
     await ctx.send(embed = embed)
 
-
 @commands.has_permissions(administrator = True)
-@bot.command(aliases = ['roles_claim_message', 'rcm'])
-async def send_roles_claim_message(ctx):
+@bot.command(aliases = ['add_role', 'cr'])
+async def create_role(ctx, name):
+    guild = ctx.guild
+    
+    await guild.create_role(name = name)
+    await ctx.send(f"Role {name} was successfully created")
+
+#Role claim messages
+@commands.has_permissions(administrator = True)
+@bot.command(aliases = ['rcm'])
+async def roles_claim_message(ctx):
     embed = discord.Embed(title = f"🦄Hi. Here you can get role🦄", description = """
                           
 **Here you can choose a role based on your interests and skills. Just click on the reaction, and the role will appear for you.🚀
@@ -242,46 +250,94 @@ It is worth mentioning that in this way you can even get the role of a moderator
     
     embed.set_author(name = "Universal Creator", icon_url = ctx.author.avatar_url)
     
-    
+    guild = ctx.guild
     dev_role = discord.utils.get(guild.roles, name = "Dev")
     gamer_role = discord.utils.get(guild.roles, name = "Gamer")
-    musicant_role = discord.utils.get(guild.roles, name = "")
-    doctor_role = discord.utils.get(guild.roles, name = "")
-    artist_role = discord.utils.get(guild.roles, name = "")
-    writer_role = discord.utils.get(guild.roles, name = "")
-    trader_role = discord.utils.get(guild.roles, name = "")
-    businessman_role = discord.utils.get(guild.roles, name = "")
+    musicant_role = discord.utils.get(guild.roles, name = "Musicant")
+    doctor_role = discord.utils.get(guild.roles, name = "Doctor")
+    artist_role = discord.utils.get(guild.roles, name = "Artist")
+    writer_role = discord.utils.get(guild.roles, name = "Writer")
+    trader_role = discord.utils.get(guild.roles, name = "Trader")
+    businessman_role = discord.utils.get(guild.roles, name = "Businessman")
+    designer_role = discord.utils.get(guild.roles, name = "Photograpgher")
+    movie_role = discord.utils.get(guild.roles, name = "Movie")
     
     talant_embed = discord.Embed(title = f"Talant roles", description = f"""
                                 
-**Dev**: {dev_role}
-**Gamer**: {gamer_role}
-**Musicant**: {}
+**Dev**: ***💻***
+**Gamer**: ***🎮***
+**Musicant**: ***🎵***
+**Doctor**: ***🩺***
+**Artist**: ***🎨***
+**Writer**: ***🖊***
+**Trader**: ***📈***
+**Businessman**: ***📥***
+**Photographer**: ***📸***
+**Movie**: ***🎥***
                                 
                                 
-                                """)
-    
+                                """, color = discord.Color.purple())
     
     await ctx.send(embed = embed)
     
-@bot.even()
-async def color_role_claim(ctx, payload):
-    message_id = 965958595193753672
+    message = await ctx.send(embed = talant_embed)
     
-    if message_id == payload.message_id:
-        member = payload.member
-        guild = payload.guild
-        
-        emoji = payload.emoji.name
-        
-        if emoji == '🤵‍♂️':
-            role = discord.utils.get(guild.roles, name = "male")
-        elif emoji == '👰‍♀️':
-            role = discord.utils.get(guild.roles, name = "female")
-        elif emoji == '':
-            pass
+    await message.add_reaction("💻")
+    await message.add_reaction("🎮")
+    await message.add_reaction("🎵")
+    await message.add_reaction("🩺")
+    await message.add_reaction("🎨")
+    await message.add_reaction("🖊")
+    await message.add_reaction("📈")
+    await message.add_reaction("📥")
+    await message.add_reaction("📸")
+    await message.add_reaction("🎥")
     
+    
+    
+@bot.event
+async def on_raw_reaction_add(payload):
+    
+    guild = bot.get_guild(payload.guild_id)
+    
+    dev_role = discord.utils.get(guild.roles, name = "Dev")
+    gamer_role = discord.utils.get(guild.roles, name = "Gamer")
+    musicant_role = discord.utils.get(guild.roles, name = "Musicant")
+    doctor_role = discord.utils.get(guild.roles, name = "Doctor")
+    artist_role = discord.utils.get(guild.roles, name = "Artist")
+    writer_role = discord.utils.get(guild.roles, name = "Writer")
+    trader_role = discord.utils.get(guild.roles, name = "Trader")
+    businessman_role = discord.utils.get(guild.roles, name = "Businessman")
+    designer_role = discord.utils.get(guild.roles, name = "Photograpgher")
+    movie_role = discord.utils.get(guild.roles, name = "Movie")
+    
+    member = payload.member
+    guild = bot.get_guild(payload.guild_id)
+    
+    emoji = payload.emoji.name
+    
+    if emoji == "💻":
+        role = discord.utils.get(guild.roles, name = "Developer")
+    elif emoji == '🎮':
+        role = discord.utils.get(guild.roles, name = "Gamer")
+    elif emoji == "🎵":
+        role = discord.utils.get(guild.roles, name = "Musicant")
+    elif emoji == "🩺":
+        role = discord.utils.get(guild.roles, name = "Doctor")
+    elif emoji == "🎨":
+        role = discord.utils.get(guild.roles, name = "Artist")
+    elif emoji == "🖊":
+        role = discord.utils.get(guild.roles, name = "Writer")
+    elif emoji == "📈":
+        role = discord.utils.get(guild.roles, name = "Trader")
+    elif emoji == "📥":
+        role = discord.utils.get(guild.roles, name = "Businessman")
+    elif emoji == "📸":
+        role = discord.utils.get(guild.roles, name = "Photographer")
+    elif emoji == "🎥":
+        role = discord.utils.get(guild.roles, name = "Movie")
 
+    await member.add_roles(role)
 #Errors handling
 @bot.event
 async def on_command_error(ctx, error):
