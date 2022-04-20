@@ -1,4 +1,5 @@
 import os
+import re
 from dotenv import load_dotenv
 import discord
 from discord.ext import commands
@@ -15,7 +16,6 @@ intents.members = True
 SERVER_NAME = "Universal Creator"
 #CONNECTION = sqlite3.connect("/Users/artush/Code/bots/discord/uc-discord-bot/uc-bot-db.sqlite3")
 #CURSOR = CONNECTION.cursor()
-
 
 bot = commands.Bot(command_prefix = f"{PREFIX}", help_command = None, intents = intents, description = "Universal Helper", case_insensitive = False)
 
@@ -108,7 +108,26 @@ async def create_text_channel(ctx, channel_name):
 async def create_voice_channel(ctx, channel_name):
 	guild = ctx.guild
 	await guild.create_voice_channel(channel_name)
- 
+
+#Delete text channel
+@commands.has_permissions(administrator = True)
+@bot.command(aliases = ['dtc', 'delete_txt_channel'])
+async def delete_text_channel(ctx, channel: discord.TextChannel):
+    if channel is not None:
+      await channel.delete()
+    else:
+      await ctx.send(f'No channel named, "{channel}", was found')
+
+#Delete voice channel      
+@commands.has_permissions(administrator = True)
+@bot.command(aliases = ['dvc', 'delete_vc_channel'])
+async def delete_voice_channel(ctx, channel: discord.VoiceChannel):
+    if channel is not None:
+      await channel.delete()
+    else:
+      await ctx.send(f'No channel named, "{channel}", was found')
+
+
 #Kick users
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['kick', 'kck'])
@@ -223,6 +242,7 @@ async def info(ctx, member: discord.Member):
 
     await ctx.send(embed = embed)
 
+#Create role
 @commands.has_permissions(administrator = True)
 @bot.command(aliases = ['add_role', 'cr'])
 async def create_role(ctx, name):
@@ -250,18 +270,6 @@ It is worth mentioning that in this way you can even get the role of a moderator
     
     embed.set_author(name = "Universal Creator", icon_url = ctx.author.avatar_url)
     
-    guild = ctx.guild
-    dev_role = discord.utils.get(guild.roles, name = "Dev")
-    gamer_role = discord.utils.get(guild.roles, name = "Gamer")
-    musicant_role = discord.utils.get(guild.roles, name = "Musicant")
-    doctor_role = discord.utils.get(guild.roles, name = "Doctor")
-    artist_role = discord.utils.get(guild.roles, name = "Artist")
-    writer_role = discord.utils.get(guild.roles, name = "Writer")
-    trader_role = discord.utils.get(guild.roles, name = "Trader")
-    businessman_role = discord.utils.get(guild.roles, name = "Businessman")
-    designer_role = discord.utils.get(guild.roles, name = "Photograpgher")
-    movie_role = discord.utils.get(guild.roles, name = "Movie")
-    
     talant_embed = discord.Embed(title = f"Talant roles", description = f"""
                                 
 **Dev**: ***💻***
@@ -274,6 +282,7 @@ It is worth mentioning that in this way you can even get the role of a moderator
 **Businessman**: ***📥***
 **Photographer**: ***📸***
 **Movie**: ***🎥***
+**NFT Collector**: ***💸***
                                 
                                 
                                 """, color = discord.Color.purple())
@@ -292,28 +301,15 @@ It is worth mentioning that in this way you can even get the role of a moderator
     await message.add_reaction("📥")
     await message.add_reaction("📸")
     await message.add_reaction("🎥")
+    await message.add_reaction("💸")
     
     
-    
+#Getting role on reaction press
 @bot.event
 async def on_raw_reaction_add(payload):
     
     guild = bot.get_guild(payload.guild_id)
-    
-    dev_role = discord.utils.get(guild.roles, name = "Dev")
-    gamer_role = discord.utils.get(guild.roles, name = "Gamer")
-    musicant_role = discord.utils.get(guild.roles, name = "Musicant")
-    doctor_role = discord.utils.get(guild.roles, name = "Doctor")
-    artist_role = discord.utils.get(guild.roles, name = "Artist")
-    writer_role = discord.utils.get(guild.roles, name = "Writer")
-    trader_role = discord.utils.get(guild.roles, name = "Trader")
-    businessman_role = discord.utils.get(guild.roles, name = "Businessman")
-    designer_role = discord.utils.get(guild.roles, name = "Photograpgher")
-    movie_role = discord.utils.get(guild.roles, name = "Movie")
-    
     member = payload.member
-    guild = bot.get_guild(payload.guild_id)
-    
     emoji = payload.emoji.name
     
     if emoji == "💻":
@@ -336,8 +332,50 @@ async def on_raw_reaction_add(payload):
         role = discord.utils.get(guild.roles, name = "Photographer")
     elif emoji == "🎥":
         role = discord.utils.get(guild.roles, name = "Movie")
-
+    elif emoji == "💸":
+        role = discord.utils.get(guild.roles, name = "NFT Collector")
+    
     await member.add_roles(role)
+
+#Deleting role on reaction repress    
+@bot.event
+async def on_raw_reaction_remove(payload):
+    guild = bot.get_guild(payload.guild_id)
+    member = payload.member
+    emoji = payload.emoji.name
+    
+    if emoji == "💻":
+        role = discord.utils.get(guild.roles, name = "Developer")
+    elif emoji == '🎮':
+        role = discord.utils.get(guild.roles, name = "Gamer")
+    elif emoji == "🎵":
+        role = discord.utils.get(guild.roles, name = "Musicant")
+    elif emoji == "🩺":
+        role = discord.utils.get(guild.roles, name = "Doctor")
+    elif emoji == "🎨":
+        role = discord.utils.get(guild.roles, name = "Artist")
+    elif emoji == "🖊":
+        role = discord.utils.get(guild.roles, name = "Writer")
+    elif emoji == "📈":
+        role = discord.utils.get(guild.roles, name = "Trader")
+    elif emoji == "📥":
+        role = discord.utils.get(guild.roles, name = "Businessman")
+    elif emoji == "📸":
+        role = discord.utils.get(guild.roles, name = "Photographer")
+    elif emoji == "🎥":
+        role = discord.utils.get(guild.roles, name = "Movie")
+    elif emoji == "💸":
+        role = discord.utils.get(guild.roles, name = "NFT Collector")
+        
+    if role is not None:
+        member = discord.utils.find(lambda m : m.id == payload.user_id, guild.members)
+        if member is not None:
+            await member.remove_roles(role)
+        else:
+            print("Member not found")
+    else:
+        print("Role not found")
+    
 #Errors handling
 @bot.event
 async def on_command_error(ctx, error):
@@ -360,4 +398,5 @@ async def on_command_error(ctx, error):
         await ctx.reply("Something went wrong")
         print(error)
 
+#Running bot
 bot.run(DISCORD_TOKEN)
