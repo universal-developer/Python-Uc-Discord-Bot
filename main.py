@@ -3,9 +3,7 @@ import re
 from dotenv import load_dotenv
 import discord
 from discord.ext import commands
-import sqlite3
 from datetime import datetime, timedelta, timezone
-
 
 load_dotenv()
 
@@ -14,12 +12,8 @@ PREFIX = "uc!"
 intents = discord.Intents.default()
 intents.members = True
 SERVER_NAME = "Universal Creator"
-#CONNECTION = sqlite3.connect("/Users/artush/Code/bots/discord/uc-discord-bot/uc-bot-db.sqlite3")
-#CURSOR = CONNECTION.cursor()
 
 bot = commands.Bot(command_prefix = f"{PREFIX}", help_command = None, intents = intents, description = "Universal Helper", case_insensitive = False)
-
-
 
 #Bot is ready command
 @bot.event
