@@ -1,5 +1,5 @@
 from discord.ext import commands
-  
+
 PREFIX = "uc!"
 
 class Help(commands.Cog):
