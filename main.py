@@ -19,13 +19,25 @@ SERVER_NAME = "Universal Creator"
 
 bot = commands.Bot(command_prefix = f"{PREFIX}", help_command = None, intents = intents, description = "Universal Helper", case_insensitive = False)
 
+
+
 #Bot is ready command
 @bot.event
 async def on_ready():
-    #print("Database created and Successfully Connected to SQLite") 
-    #print("============================================================")
+    
     await bot.change_presence(activity = discord.Game(name = "Ready to help"))
     print('We have logged in as {0.user}'.format(bot))
+    
+    for file in os.listdir("./commands"):
+        if file.endswith(".py"):
+            bot.load_extension("cogs." + file[:-3])
+
+    print("Cogs are loaded")
+    
+    #print("Database created and Successfully Connected to SQLite") 
+    #print("============================================================")
+    
+    
     
 #Getting all messages as lowercase
 @bot.event
