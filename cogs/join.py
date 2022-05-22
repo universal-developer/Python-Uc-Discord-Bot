@@ -1,13 +1,13 @@
 from discord.ext import commands
 from main import * 
 
-class Member(commands.Cog):
+class Join(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
     
   @bot.event
   @commands.Cog.listener()
-  async def on_member_join(self, member):
+  async def on_member_join(member):
       await bot.get_channel(963807822846496818).send(f"Welcome {member.mention} to the {SERVER_NAME} ")
 
   #Bot sends message for members, when they're leave
@@ -18,4 +18,4 @@ class Member(commands.Cog):
       
 
 def setup(bot):
-  bot.add_cog(Member(bot))
+  bot.add_cog(Join(bot))
