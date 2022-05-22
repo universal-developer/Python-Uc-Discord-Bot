@@ -29,7 +29,15 @@ class Channels(commands.Cog):
     guild = ctx.guild
     await guild.create_voice_channel(channel_name)
 
-  
+  #Delete text channel
+  @commands.has_permissions(administrator = True)
+  @commands.command(aliases = ['dtc', 'delete_txt_channel'])
+  @commands.Cog.listener()
+  async def delete_text_channel(self, ctx, channel: discord.TextChannel):
+      if channel is not None:
+        await channel.delete()
+      else:
+        await ctx.send(f'No channel named, "{channel}", was found')
 
   #Delete voice channel      
   @commands.has_permissions(administrator = True)
