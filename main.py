@@ -1,5 +1,4 @@
 import os
-import re
 from dotenv import load_dotenv
 import discord
 from discord.ext import commands
