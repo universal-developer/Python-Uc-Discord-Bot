@@ -9,12 +9,30 @@ class Roles(commands.Cog):
     #Create role
     @commands.has_permissions(administrator = True)
     @commands.command(aliases = ['make_role', 'cr'])
+    @commands.Cog.listener()
     async def create_role(self, ctx, name):
         guild = ctx.guild
         
         await guild.create_role(name = name)
         await ctx.send(f"Role {name} was successfully created")
 
+
+    @commands.command(aliases = ['delrole', 'dr'], pass_context = True)
+    @commands.has_permissions(administrator = True)
+    @commands.Cog.listener()
+    async def delete_role(ctx, name):
+        role_object = discord.utils.get(ctx.message.guild.roles, name = name)
+        await role_object.delete()
+        await ctx.send(f"Role {name} was successfully deleted")
+    
+    
+    @commands.command(aliases = ['deluserrole', 'dur'], pass_context = True)
+    @commands.has_role('staff')
+    async def mute(ctx, user: discord.Member):
+        role_get = get(member.guild.roles, id=role_id) 
+        await member.remove_roles(role_get) 
+        await bot.say("{} has been muted from chat".format(user.name))
+        
     #Role claim messages
     @commands.has_permissions(administrator = True)
     @commands.command(aliases = ['rcm'])
