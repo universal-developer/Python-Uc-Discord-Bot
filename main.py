@@ -13,6 +13,9 @@ SERVER_NAME = "Universal Creator"
 
 bot = commands.Bot(command_prefix = f"{PREFIX}", help_command = None, intents = intents, description = "Universal Helper", case_insensitive = False)
 
+
+
+
 #Getting users status
 def getstatus(self, m):
     if str(m.status) == "dnd":
