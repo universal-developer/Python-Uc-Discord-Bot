@@ -75,8 +75,10 @@ async def on_command_error(ctx, error):
     elif isinstance(error, discord.NotFound):
         await ctx.reply("Nobody found")
         print(error)
+    elif isinstance(error, discord.Forbidden):
+        await ctx.reply("Error 403")
     else:
-        await ctx.reply("Something went wrong")
+        await ctx.reply(f"Something went wrong. Error: {error}")
         print(error)
 
 #Running bot

@@ -29,13 +29,14 @@ class Ban(commands.Cog):
           discriminator = user.discriminator
           user_id = user.id
           reason = ban_entry.reason
+      
           
           await ctx.send(f"""
   *User:* **{user}**
-  *Username:* **{user_name}**
-  *Discriminator (#):* **{discriminator}**
-  *User ID:* **{user_id}**
-  *Reason:* **{reason}**           
+*Username:* **{user_name}**
+*Discriminator (#):* **{discriminator}**
+*User ID:* **{user_id}**
+*Reason:* **{reason}**           
               """)
 
   #Unban users

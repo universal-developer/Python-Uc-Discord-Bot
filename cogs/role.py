@@ -12,27 +12,44 @@ class Roles(commands.Cog):
     @commands.Cog.listener()
     async def create_role(self, ctx, name):
         guild = ctx.guild
-        
         await guild.create_role(name = name)
-        await ctx.send(f"Role {name} was successfully created")
+        await ctx.send(f"Role **{name}** was successfully created")
 
 
     @commands.command(aliases = ['delrole', 'dr'], pass_context = True)
     @commands.has_permissions(administrator = True)
     @commands.Cog.listener()
-    async def delete_role(ctx, name):
+    async def delete_role(self, ctx, name):
         role_object = discord.utils.get(ctx.message.guild.roles, name = name)
         await role_object.delete()
-        await ctx.send(f"Role {name} was successfully deleted")
+        await ctx.send(f"Role **{name}** was successfully deleted")
     
-    
-    @commands.command(aliases = ['deluserrole', 'dur'], pass_context = True)
-    @commands.has_role('staff')
-    async def mute(ctx, user: discord.Member):
-        role_get = get(member.guild.roles, id=role_id) 
-        await member.remove_roles(role_get) 
-        await bot.say("{} has been muted from chat".format(user.name))
+    #Getting Roles List with Embed 
+    @commands.command(aliases = ['rl'], pass_context = True)
+    @commands.has_permissions(administrator = True)
+    @commands.Cog.listener()
+    async def roles_list(self, ctx):
         
+        roles_name = []
+        roles_id = []
+
+        for role in ctx.guild.roles:
+            roles_name.append(role.name)
+            roles_id.append(role.id)
+        
+        roles_id_str = [str(int) for int in roles_id]
+       
+            
+        embed = discord.Embed(title = "🚀🚀🚀 Roles List 🚀🚀🚀", color = discord.Color.purple())
+        
+        embed.add_field(name = "Roles Name: ", value = "\n".join(roles_name[1::]), inline = True)
+        embed.add_field(name = "Roles ID: ", value = "\n".join(roles_id_str[1::]), inline = True)
+        embed.set_author(name = ctx.author.name, icon_url = ctx.author.avatar_url)
+        
+        await ctx.send(embed = embed)
+        
+        
+    
     #Role claim messages
     @commands.has_permissions(administrator = True)
     @commands.command(aliases = ['rcm'])
