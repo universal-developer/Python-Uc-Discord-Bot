@@ -8,8 +8,7 @@ class Help(commands.Cog):
      
   @commands.command(name = 'help')
   @commands.Cog.listener()
-  async def on_help(self, ctx):
-    
+  async def on_help(self, ctx):    
       await ctx.send(f"""***Here is what I can actually do:***
                     
   ***For mere mortals***
