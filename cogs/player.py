@@ -1,15 +1,15 @@
 from discord.ext.commands import Bot
 from discord.ext import commands
 import youtube_dl
-from discord import FFmpegPCMAudio
-from discord.utils import get
-
-
 from main import * 
 class Player(commands.Cog):
   
   def __init__(self, bot):
     self.bot = bot
+  
+  
+  YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist':'False'}
+  FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
       
   @commands.command(pass_context = True)
   @commands.Cog.listener()
@@ -26,25 +26,32 @@ class Player(commands.Cog):
         await ctx.guild.voice_client.disconnect() 
         await ctx.send(f"I left from **{channel}**")
     else: # But if it isn't
-        await ctx.send("I'm not in a voice channel right now")
+      pass
   
   @commands.command(pass_context = True)
   @commands.Cog.listener()
   async def play(self, ctx, url):
-    channel = ctx.message.author.voice.channel
-    if not channel:
-        await ctx.send("You are not connected to a voice channel")
-        return
-    voice = get(bot.voice_clients, guild=ctx.guild)
-    
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio('1.m4a')
-    player = voice.play(source)
-    voice.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source = URL, **FFMPEG_OPTIONS))
-    
+    YDL_OPTIONS = {'format': "bestaudio"}
+    FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+    vc = ctx.voice_client
+    with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
+        info=  ydl.extract_info(url,download=False)
+        url2 = info['formats'][0]['url']
+        source = await discord.FFmpegOpusAudio.from_probe(url2,
+      **FFMPEG_OPTIONS)
+        vc.play(source)
+
+  @commands.command(pass_context = True)
+  @commands.Cog.listener()
+  async def pause(self, ctx):
+    await ctx.voice_client.pause()
+    await ctx.send("Paused")
+  
+  @commands.command(pass_context = True)
+  @commands.Cog.listener()
+  async def resume(self, ctx):
+    await ctx.voice_client.resume()
+    await ctx.send("Resume")
     
 def setup(bot):
   bot.add_cog(Player(bot))
