@@ -5,7 +5,7 @@ from main import *
 class Help(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
-     
+    
   @commands.command(name = 'help')
   @commands.Cog.listener()
   async def on_help(self, ctx):
